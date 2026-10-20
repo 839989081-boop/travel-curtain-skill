@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eee8dd"><title>一帘时光 · 旅行相册</title>
+  <link rel="stylesheet" href="style.css"><link rel="stylesheet" href="story.css"><link rel="stylesheet" href="places.css?v=20261019"><link rel="stylesheet" href="single.css?v=single5">
+</head>
+<body>
+  <header class="header">
+    <button class="brand" id="home" aria-label="回到远景"><span class="brand-mark">帘</span><span>一帘时光<small>A CURTAIN OF MEMORIES</small></span></button>
+    <nav class="destination-nav" aria-label="选择地点"><div id="destination-tabs" role="tablist" aria-label="旅程地点"></div><button id="destinations-open" disabled>更多地点⌄</button></nav>
+    <button class="import-button" id="import-open"><span>＋</span> 导入照片</button>
+  </header>
+  <section class="album-tools" aria-label="照片与互动"><div class="tool-primary"><button id="browse-album" class="main-action">查看相册</button><button id="gesture-toggle" aria-pressed="false">手势互动</button></div><div class="tool-secondary"><label>照片 <select id="category-filter" aria-label="筛选照片"><option value="all">全部</option><option value="landscape">风景</option><option value="portrait">人物</option><option value="mixed">人景合照</option><option value="unknown">待确认</option></select></label><span id="filter-summary" role="status"></span><button id="appearance-open">设置 ⚙</button></div></section>
+  <main id="stage" role="tabpanel" tabindex="0" aria-label="照片珠帘。移动鼠标拨动，滚轮向上放大。也可使用下方放大按钮和方向键。">
+    <div class="loading" id="loading">正在挂起你的风景…</div>
+    <canvas id="shadow" aria-hidden="true"></canvas><canvas id="background" aria-hidden="true"></canvas>
+    <div id="vignette" aria-hidden="true"></div><canvas id="foreground" aria-hidden="true"></canvas>
+    <button id="roof-toggle" aria-label="展开瑞士照片珠帘" aria-expanded="false"><span>点击屋顶，展开旅程 ↓</span></button>
+    <button id="back-to-curtain" hidden>← 返回全景 <kbd>Esc</kbd></button>
+    <div class="intro" id="intro"><p>把走过的地方，挂进时光里</p><span>一列照片，一段旅程。</span></div>
+    <div class="period-label" id="period" hidden><span id="period-city">瑞士 · 山湖之间</span><h1 id="period-name">2025年7月</h1><p id="period-count">示例风景</p><button id="previous-column" aria-label="上一列">←</button><button id="next-column" aria-label="下一列">→</button></div>
+    <button id="photo-action" hidden>查看这张照片 <span>↗</span></button>
+    <div class="hint" id="hint">轻轻划过，拨开一帘风景</div>
+    <div class="zoom-controls"><button id="zoom-out" aria-label="缩小">−</button><span id="zoom-label">远景</span><button id="zoom-in" aria-label="放大">＋</button><span class="divider"></span><button id="reset" aria-label="返回全景">返回全景</button></div>
+  </main>
+  <footer><div class="footer-left"><span class="dot"></span><span id="collection-info">瑞士 · 示例风景</span></div><div class="instructions" id="instructions">移动鼠标拨开 <span>·</span> 滚轮放大 <span>·</span> 双击聚焦</div><span class="sample" id="sample-label">AI 生成示例照片</span></footer>
+  <div class="toast" id="toast" role="status" hidden></div>
+  <dialog id="gallery-dialog" aria-label="圆环相册">
+    <button class="photo-return" id="gallery-return">← 返回建筑</button><button class="dialog-close" id="gallery-close" aria-label="关闭圆环相册">×</button>
+    <div class="gallery-heading"><span>一帘时光 · 旅程留影</span><h2>让风景，绕着回忆流转。</h2><p>按住照片左右拖动 · 点任意照片，读它的故事</p></div>
+    <div id="ring-scene"><div id="photo-ring"></div></div>
+    <div class="ring-controls"><button id="ring-prev" aria-label="圆环上一张">←</button><span id="ring-position"></span><button id="ring-next" aria-label="圆环下一张">→</button></div>
+  </dialog>
+  <dialog id="photo-dialog" aria-label="照片故事">
+    <button class="photo-return" id="photo-return">← 返回照片列</button><button class="dialog-close" id="photo-close" aria-label="关闭照片">×</button>
+    <div class="story-layout"><div class="story-image"><button id="large-photo" class="large-photo" aria-label="打开这张照片的大图"></button><div class="story-image-footer"><button id="carousel-prev" aria-label="上一张照片">←</button><span id="photo-position"></span><button id="carousel-next" aria-label="下一张照片">→</button><button id="open-original">查看大图 ↗</button></div></div>
+    <div class="story-copy"><span class="story-kicker" id="photo-caption"></span><h1 id="photo-title"></h1><button id="save-photo" class="save-image">↓ 保存图片</button>
+      <div class="story-facts"><label>照片类型 <select id="photo-category" aria-label="照片类型"><option value="landscape">风景</option><option value="portrait">人物</option><option value="mixed">人景合照</option><option value="unknown">待确认</option></select></label><div><span class="fact-label">时间</span><p id="taken-date"></p><small id="date-source"></small></div><label>地址 <input id="photo-address" maxlength="120" placeholder="写下拍摄地点" aria-label="拍摄地址"></label></div>
+      <div class="mood"><label for="photo-mood">此刻心情</label><textarea id="photo-mood" maxlength="1500" rows="4" placeholder="把这一刻，写成一段回忆…"></textarea><button id="save-mood">保存记录</button><span id="mood-status" role="status"></span></div>
+    </div></div>
+  </dialog>
+  <dialog id="zoom-dialog" aria-label="照片大图"><button class="photo-return" id="zoom-return">← 返回照片故事</button><button class="dialog-close" id="zoom-close" aria-label="关闭大图">×</button><div id="zoom-photo"></div><button id="zoom-save">↓ 保存这张图片</button></dialog>
+  <dialog id="import-dialog"><button class="dialog-close" id="import-close" aria-label="关闭导入">×</button><span class="eyebrow">YOUR MEMORIES</span><h2>整段旅程，一次放进来。</h2><p>选择整个照片文件夹，子文件夹会成为一列。<br>也可以按住多选，一次导入多张照片。</p><label class="auto-classify-option"><input id="auto-region" type="checkbox" checked> 按目录／文件名中的省份或国家名称自动分区，无法确定时放入当前地区</label><label class="auto-classify-option"><input id="auto-classify" type="checkbox" checked> 导入后自动识别风景 / 人物 / 合照（本机处理）</label><div class="import-choices"><button id="choose-folder">选择照片文件夹 <span>↗</span></button><button id="choose-files">批量选择照片 <span>↗</span></button></div><p class="import-note">照片的屏幕尺寸副本保存在当前浏览器，刷新后仍可查看。<br>再次导入会追加照片；支持本地批量导入并按拍摄月份整理；百度等网盘分享链接需要连接对应网盘并完成授权，目前未接通，不会自动读取。</p><button id="restore-demo">恢复本地区的示例照片</button><input id="folder-input" type="file" accept="image/*" multiple webkitdirectory hidden><input id="files-input" type="file" accept="image/*" multiple hidden></dialog>
+  <dialog id="building-dialog" aria-label="旅程建筑工坊"><button class="dialog-close" id="building-close" aria-label="关闭建筑预览">×</button><span class="eyebrow">A PLACE TO REMEMBER</span><h2>给回忆，换一道屋檐。</h2><p><span id="building-place"></span> · 已预存建筑，切换地点即可使用。</p><div class="building-layout"><div id="building-preview" aria-label="当前建筑预览"></div><div class="building-fields"><div id="custom-country" hidden><label>国家／地区名称<input id="country-name" maxlength="40" placeholder="输入列表里没有的国家或地区"></label><button id="country-add">添加并切换地区</button></div><span class="eyebrow">READY TO ADD</span><h3 id="building-display-name">预置建筑</h3><p class="building-ready-note">当前地点的建筑已准备好。自定义仅影响这个地点。</p><button id="building-done" class="building-add-primary">完成，返回建筑</button><p id="building-status" role="status"></p><details class="building-custom"><summary>自定义这座建筑</summary><label>建筑名称<input id="building-title" maxlength="80" placeholder="例如：侗寨鼓楼、圣托里尼蓝顶教堂"></label><div class="building-presets"><button data-building-preset="0">木屋屋檐</button><button data-building-preset="1">徽式马头墙</button><button data-building-preset="2">寺庙屋檐</button></div><button id="building-restore-default">恢复这个地区的预置建筑</button><button id="building-upload">＋ 上传建筑图片</button><small>推荐透明 PNG，只保留建筑顶部。JPG 也可上传，但会保留原背景。</small><button id="building-prompt">复制这个建筑的生图提示词 ↗</button><textarea id="building-prompt-text" rows="5" readonly hidden aria-label="建筑生图提示词"></textarea></details></div></div><input id="building-file" type="file" accept="image/png,image/jpeg,image/webp" hidden></dialog>
+  <dialog id="destinations-dialog" aria-label="选择地点"><button id="destinations-close" class="dialog-close" aria-label="关闭地点选择">×</button><h2>想看哪一段旅程？</h2><div class="destination-controls"><div class="scope-switch"><button data-destination-scope="china" aria-pressed="false">国内</button><button data-destination-scope="world" aria-pressed="true">国外</button></div><input id="destination-search" type="search" aria-label="搜索省份或国家" placeholder="搜索省份或国家"></div><div id="destination-choices"></div><p id="destination-empty" hidden>没有找到这个地点。</p></dialog>
+  <dialog id="appearance-dialog" aria-label="照片设置"><button id="appearance-close" class="dialog-close" aria-label="关闭照片设置">×</button><h2>照片设置</h2><section class="setting-row"><div><h3>珠帘密度</h3><p>调整远景照片的排列间距。</p></div><label class="density-label"><input id="density" type="range" min="24" max="36" step="4" value="32" aria-label="珠帘密度"><output id="density-value">适中</output></label></section><section class="setting-row"><div><h3>照片分类</h3><p>导入后自动分类，也可重新识别。</p></div><button id="classify-photos">自动分类</button></section><section class="setting-row"><div><h3>建筑外观</h3><p>已有屋檐可直接用，也可上传替换。</p></div><button id="building-open">自定义建筑 ↗</button></section></dialog>
+  <aside id="gesture-panel" hidden><button id="gesture-close" aria-label="关闭摄像头">×</button><video id="gesture-video" autoplay playsinline muted></video><p id="gesture-status" role="status"></p><small>双手展开：放大 · 合拢：缩小<br>张开单手向左 / 向右拨动<br>摄像头画面只在本机处理</small></aside>
+  <script>window.TRAVEL_PUBLIC=true;</script>
+<script src="vendor/gsap.js"></script><script src="vendor/exifr.js"></script><script src="features.js?v=20261011-gesture2"></script><script src="building-catalog.js?v=exhibition4"></script><script src="places.js?v=single5"></script><script src="app.js?v=single5"></script><script src="navigation.js?v=single5"></script>
+</body>
+</html>
+
+
+
+
