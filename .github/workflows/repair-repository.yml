@@ -44,7 +44,7 @@ jobs:
               if target.exists() and hashlib.sha256(target.read_bytes()).hexdigest() == sha:
                   return name, 'already complete'
               if name == '.nojekyll':
-                  data = b'\n'
+                  data = bytes([13, 10])
               else:
                   for attempt in range(3):
                       try:
