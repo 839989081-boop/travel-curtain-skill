@@ -1,0 +1,107 @@
+name: Repair complete travel curtain repository
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [.github/workflows/repair-repository.yml]
+permissions:
+  contents: write
+concurrency:
+  group: repair-travel-curtain
+  cancel-in-progress: false
+jobs:
+  repair:
+    if: github.repository == '839989081-boop/travel-curtain-skill'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+      - name: Download and verify missing template assets
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import concurrent.futures, hashlib, json, os, time
+          from pathlib import Path, PurePosixPath
+          from urllib.request import Request, urlopen
+
+          ROOT = Path.cwd().resolve()
+          SITE = ROOT / 'assets/site'
+          SOURCE = 'https://curtain-of-travel-memories.shanye1402.chatgpt.site/'
+          manifest = ROOT / 'references/site-sha256.json'
+          EXPECTED_MANIFEST = '578058322bd883bd32a28b3ac08599ceaf154a22a53728501a88272a5fd1e0fb'
+          assert hashlib.sha256(manifest.read_bytes()).hexdigest() == EXPECTED_MANIFEST, 'Manifest changed; stop and inspect it.'
+          expected = json.loads(manifest.read_text(encoding='utf-8'))
+          SITE.mkdir(parents=True, exist_ok=True)
+
+          def restore(item):
+              name, sha = item
+              relative = PurePosixPath(name)
+              assert not relative.is_absolute() and '..' not in relative.parts
+              target = SITE.joinpath(*relative.parts)
+              assert SITE.resolve() in target.resolve().parents
+              if target.exists() and hashlib.sha256(target.read_bytes()).hexdigest() == sha:
+                  return name, 'already complete'
+              if name == '.nojekyll':
+                  data = b'\n'
+              else:
+                  for attempt in range(3):
+                      try:
+                          request = Request(SOURCE + name, headers={'User-Agent': 'Mozilla/5.0'})
+                          with urlopen(request, timeout=120) as response:
+                              assert response.status == 200, name
+                              data = response.read()
+                          assert hashlib.sha256(data).hexdigest() == sha, 'Hash mismatch: ' + name
+                          break
+                      except Exception:
+                          if attempt == 2: raise
+                          time.sleep(2 * (attempt + 1))
+              assert hashlib.sha256(data).hexdigest() == sha, 'Hash mismatch: ' + name
+              target.parent.mkdir(parents=True, exist_ok=True)
+              temporary = target.with_name(target.name + '.download')
+              temporary.write_bytes(data)
+              temporary.replace(target)
+              return name, 'restored'
+
+          with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+              for name, state in pool.map(restore, expected.items()):
+                  print(state + ': ' + name, flush=True)
+
+          # Correct only verified duplicates; keep any user-edited root file.
+          for name in expected:
+              if '/' not in name and name != '.nojekyll':
+                  original = ROOT / name
+                  canonical = SITE / name
+                  if original.is_file() and original.read_bytes() == canonical.read_bytes():
+                      original.unlink()
+                      print('Moved identical root file into assets/site: ' + name, flush=True)
+          attrs = ROOT / '.gitattributes'
+          rule = 'assets/site/** -text'
+          text = attrs.read_text(encoding='utf-8') if attrs.exists() else ''
+          if rule not in text:
+              attrs.write_text(text.rstrip() + '\n' + rule + '\n', encoding='utf-8')
+          ignore = ROOT / '.gitignore'
+          if not ignore.exists():
+              ignore.write_text('__pycache__/\n*.pyc\n.env\n.env.*\n.DS_Store\nThumbs.db\n', encoding='utf-8')
+          print('All ' + str(len(expected)) + ' template files restored and verified.', flush=True)
+          PY
+      - name: Verify complete Skill website
+        run: python3 scripts/verify.py
+      - name: Commit verified restoration
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --all -- assets/site .gitattributes .gitignore
+          for file in app.js building-catalog.js features.js index.html model-worker.js navigation.js places.css places.js single.css story.css style.css; do
+            if git ls-files --error-unmatch "$file" >/dev/null 2>&1 && [ ! -f "$file" ]; then
+              git add -- "$file"
+            fi
+          done
+          if git diff --cached --quiet; then
+            echo "Repository is already complete."
+          else
+            git commit -m "Restore complete travel curtain assets and models"
+            git push origin HEAD:main
+          fi
