@@ -1,0 +1,4 @@
+interface:
+  display_name: "一帘时光 · 旅行珠帘"
+  short_description: "用预置屋檐、照片珠帘和立体圆环创建可分享的旅行相册网站，含本地分类与手势"
+  default_prompt: "用 $travel-curtain 创建一个旅行照片珠帘网站，保留顶部地名切换和清晰的返回按钮。"
