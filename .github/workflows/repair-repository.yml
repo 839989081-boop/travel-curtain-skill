@@ -44,7 +44,10 @@ jobs:
               assert SITE.resolve() in target.resolve().parents
               if target.exists() and hashlib.sha256(target.read_bytes()).hexdigest() == sha:
                   return name, 'already complete'
-              if name == '.nojekyll':
+              root_copy = ROOT / name
+              if '/' not in name and root_copy.is_file() and hashlib.sha256(root_copy.read_bytes()).hexdigest() == sha:
+                  data = root_copy.read_bytes()
+              elif name == '.nojekyll':
                   data = bytes([13, 10])
               else:
                   for attempt in range(3):
