@@ -1,0 +1,1 @@
+GSAP 3.13.0. Copyright and license notice retained in vendor/gsap.js. Official terms: https://gsap.com/standard-license/ . Official package: https://www.npmjs.com/package/gsap/v/3.13.0
