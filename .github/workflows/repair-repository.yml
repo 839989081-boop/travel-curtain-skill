@@ -25,6 +25,7 @@ jobs:
           import concurrent.futures, hashlib, json, os, time
           from pathlib import Path, PurePosixPath
           from urllib.request import Request, urlopen
+          from urllib.parse import quote
 
           ROOT = Path.cwd().resolve()
           SITE = ROOT / 'assets/site'
@@ -48,7 +49,7 @@ jobs:
               else:
                   for attempt in range(3):
                       try:
-                          request = Request(SOURCE + name, headers={'User-Agent': 'Mozilla/5.0'})
+                          request = Request(SOURCE + quote(name, safe="/"), headers={'User-Agent': 'Mozilla/5.0'})
                           with urlopen(request, timeout=120) as response:
                               assert response.status == 200, name
                               data = response.read()
